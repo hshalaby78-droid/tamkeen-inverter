@@ -102,7 +102,7 @@ ul.k{margin:0;padding-inline-start:20px}
  .sop{border:0;padding:0}
  body{background:#fff}
 }
-.wm{position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.2;background-repeat:repeat}
+.wm{position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.16;background-repeat:repeat}
 body{-webkit-user-select:none;user-select:none}input{-webkit-user-select:text;user-select:text}
 @media print{body>*{display:none!important}}
 </style>
@@ -251,7 +251,7 @@ document.addEventListener('contextmenu',e=>e.preventDefault());document.addEvent
   }catch(err){deny('تعذّر تحميل الدليل. حدّث الصفحة وحاول مرة أخرى.');return;}
   ROLE=DATA.role;init();
   try{const t=(s.u||'')+' — '+(s.fn||s.n||'')+' — '+new Date().toLocaleDateString('en-GB');const w=document.createElement('div');w.className='wm';
-    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="230" height="130"><text x="115" y="70" text-anchor="middle" transform="rotate(-24 115 70)" font-family="Tahoma,sans-serif" font-size="14" font-weight="700" fill="#5A648C">${t.replace(/[<>&"]/g,'')}</text></svg>`;
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="320" height="190"><text x="160" y="95" text-anchor="middle" transform="rotate(-24 160 95)" font-family="Tahoma,sans-serif" font-size="14" font-weight="700" fill="#9AA2C2">${t.replace(/[<>&"]/g,'')}</text></svg>`;
     w.style.backgroundImage=`url("data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}")`;document.body.appendChild(w);}catch(_){}
 })();
 </script>
