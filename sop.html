@@ -26,6 +26,7 @@ nav.tabs{display:flex;gap:2px;overflow-x:auto;padding:0 14px;scrollbar-width:thi
 nav.tabs button{border:0;background:none;padding:10px 14px;white-space:nowrap;color:var(--mut);border-bottom:3px solid transparent;cursor:pointer;font-weight:500}
 nav.tabs button.on{color:var(--navy);border-bottom-color:var(--navy);font-weight:700}
 nav.tabs button .n{font-size:11px;background:var(--soft);color:var(--navy);border-radius:999px;padding:0 7px;margin-inline-start:6px}
+nav.tabs button{display:inline-flex;align-items:center;gap:7px}.chi{flex:none;vertical-align:middle}.chl{display:flex;align-items:center;gap:6px}nav.tabs button:not(.on) .chi{opacity:.75}
 nav.tabs button.aud{color:var(--red)}
 nav.tabs button.aud.on{border-bottom-color:var(--red)}
 main{display:grid;grid-template-columns:320px 1fr;gap:18px;padding:18px 20px;max-width:1400px;margin:0 auto}
@@ -101,6 +102,9 @@ ul.k{margin:0;padding-inline-start:20px}
  .sop{border:0;padding:0}
  body{background:#fff}
 }
+.wm{position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.2;background-repeat:repeat}
+body{-webkit-user-select:none;user-select:none}input{-webkit-user-select:text;user-select:text}
+@media print{body>*{display:none!important}}
 </style>
 </head>
 <body>
@@ -128,6 +132,8 @@ let tab = null, cur = null, q = '';
 const isAud = () => DATA.auditRoles.includes(ROLE) && DATA.audit;
 const showChg = () => isAud() && $('#chg').checked;
 const visible = () => DATA.sops.filter(s => s.acl.includes(ROLE));
+const CHI={"GV": "<path d=\"M12 3v18M5 21h14M4 7h16M12 3l-1 4h2z\"/><path d=\"M6 7l-3 7a3 3 0 0 0 6 0zM18 7l-3 7a3 3 0 0 0 6 0z\"/>", "HR": "<circle cx=\"9\" cy=\"8\" r=\"3.2\"/><path d=\"M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6\"/><circle cx=\"17\" cy=\"9\" r=\"2.5\"/><path d=\"M16 14.2c2.8.2 5 2.6 5 5.8\"/>", "ST": "<path d=\"M3 9l1.5-5h15L21 9\"/><path d=\"M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z\"/><path d=\"M5 13v8h14v-8M10 21v-5h4v5\"/>", "INV": "<path d=\"M3 8l9-5 9 5-9 5z\"/><path d=\"M3 8v8l9 5 9-5V8M12 13v8\"/><path d=\"M7.5 5.5l9 5\"/>", "SL": "<path d=\"M3 4h2l2.4 11h11l2-8H6.2\"/><circle cx=\"9.5\" cy=\"19.5\" r=\"1.5\"/><circle cx=\"17\" cy=\"19.5\" r=\"1.5\"/><path d=\"M11 10.5l2 2 3.5-3.5\"/>", "DM": "<path d=\"M3 8l9-5 9 5v8l-9 5-9-5z\"/><path d=\"M12 8v5M12 16.2v.3\"/>", "FN": "<rect x=\"2.5\" y=\"6\" width=\"19\" height=\"12\" rx=\"2\"/><circle cx=\"12\" cy=\"12\" r=\"2.8\"/><path d=\"M6 9.5v5M18 9.5v5\"/>", "LP": "<path d=\"M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z\"/><rect x=\"9\" y=\"11\" width=\"6\" height=\"5\" rx=\"1\"/><path d=\"M10 11V9.5a2 2 0 0 1 4 0V11\"/>"};
+const chIcon=(k,sz=20)=>CHI[k]?`<svg class="chi" width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="#283583" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CHI[k]}</svg>`:'';
 const chOf = s => DATA.chapters.find(c => c.name === s.chapter).key;
 const text = s => [s.code, s.title, ...s.purpose, ...s.scope, ...s.policies.map(p => p.t), ...s.steps.flatMap(g => g.rows.map(r => r.role + ' ' + r.text)), ...(s.tables||[]).flatMap(t => t.rows.flat())].join(' ');
 
@@ -162,7 +168,7 @@ function render(){
   } else {
     DATA.chapters.forEach(c => {
       const n = vis.filter(s => s.chapter === c.name).length; if (!n) return;
-      tabs.insertAdjacentHTML('beforeend', `<button data-k="${c.key}" class="${tab===c.key?'on':''}">${esc(c.name)}<span class="n">${n}</span></button>`);
+      tabs.insertAdjacentHTML('beforeend', `<button data-k="${c.key}" class="${tab===c.key?'on':''}">${chIcon(c.key)}${esc(c.name)}<span class="n">${n}</span></button>`);
     });
     if (isAud()) tabs.insertAdjacentHTML('beforeend', `<button data-k="audit" class="aud ${tab==='audit'?'on':''}">تقرير التدقيق والفجوات</button>`);
     const on = tabs.querySelector('.on'); if (on) on.scrollIntoView({inline:'center',block:'nearest'});
@@ -185,7 +191,7 @@ const tg = t => (showChg() && t) ? `<span class="tag ${t==='new'?'t-new':'t-mod'
 function sopHTML(s){
   let h = `<button class="back">→ قائمة الإجراءات</button>`;
   h += `<div class="code">${s.code}</div>${showChg()?`<span class="badge ${s.status==='new'?'b-new':'b-mod'}">${s.status==='new'?'إجراء جديد':'إجراء مُدقَّق ومعدّل'}</span>`:''}`;
-  h += `<h2>${esc(s.title)}</h2><div class="muted" style="font-size:13px">${esc(s.chapter)}</div>`;
+  h += `<h2>${esc(s.title)}</h2><div class="muted chl" style="font-size:13px">${chIcon(chOf(s),18)}${esc(s.chapter)}</div>`;
   const r = s.raci;
   h += `<div class="raci"><div><b>المسؤول عن التنفيذ</b>${esc(r.R)}</div><div><b>المحاسَب</b>${esc(r.A)}</div><div><b>يُستشار</b>${esc(r.C)}</div><div><b>يُبلَّغ</b>${esc(r.I)}</div></div>`;
   if (s.purpose.length) h += `<h3>الغرض</h3>${s.purpose.map(p => `<p style="margin:4px 0">${esc(p)}</p>`).join('')}`;
@@ -230,6 +236,7 @@ function auditHTML(){
   h += `<p class="portal-note" style="margin-top:16px">هذا التبويب يظهر للجنة التنفيذية ومدير التجزئة فقط. باقي المستخدمين يرون الإجراءات المعتمدة لدورهم دون ملاحظات التدقيق.</p></section>`;
   return h;
 }
+document.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('copy',e=>{if(!(e.target.closest&&e.target.closest('input')))e.preventDefault()});
 (async()=>{
   const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
   const deny=m=>{document.getElementById('main').innerHTML=`<div class="empty" style="grid-column:1/-1">${m}<br><br><a href="index.html">العودة إلى بوابة تمكين للتجزئة</a></div>`;};
@@ -243,6 +250,9 @@ function auditHTML(){
     DATA=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:buf.slice(0,12)},key,buf.slice(12))));
   }catch(err){deny('تعذّر تحميل الدليل. حدّث الصفحة وحاول مرة أخرى.');return;}
   ROLE=DATA.role;init();
+  try{const t=(s.u||'')+' — '+(s.fn||s.n||'')+' — '+new Date().toLocaleDateString('en-GB');const w=document.createElement('div');w.className='wm';
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="230" height="130"><text x="115" y="70" text-anchor="middle" transform="rotate(-24 115 70)" font-family="Tahoma,sans-serif" font-size="14" font-weight="700" fill="#5A648C">${t.replace(/[<>&"]/g,'')}</text></svg>`;
+    w.style.backgroundImage=`url("data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}")`;document.body.appendChild(w);}catch(_){}
 })();
 </script>
 </body>
